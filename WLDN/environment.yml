@@ -1,0 +1,12 @@
+name: wlnfw_elem
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - molvs=0.1.1
+  - numpy
+  - python=3.8
+  - rdkit=2020.09.5
+  - scipy
+  - tensorflow=2.4
+  - tqdm

@@ -1,0 +1,1 @@
+{"batch_size": 1, "hidden": 500, "depth": 3, "epochs": 10, "learning_rate": 0.001, "clipnorm": 5.0}

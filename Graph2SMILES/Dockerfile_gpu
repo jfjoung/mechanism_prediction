@@ -1,0 +1,21 @@
+FROM mambaorg/micromamba:1.4-bionic-cuda-11.3.1
+
+USER root
+# Keep the base environment activated
+ARG MAMBA_DOCKERFILE_ACTIVATE=1
+
+# Use micromamba to resolve conda-forge, much faster than conda
+# RUN micromamba install -y python=3.8 pip rdkit=2022.09.5 openjdk=11 -c conda-forge
+RUN micromamba install -y python=3.9 pip rdkit=2022.09.4 openjdk=11 -c conda-forge
+RUN micromamba install -y pytorch==1.12.1 cudatoolkit=11.3 -c pytorch -c conda-forge
+RUN pip install \
+    networkx==2.5 \
+    opennmt-py==1.2.0 \
+    tqdm \
+    torch-model-archiver==0.3.1 \
+    torchserve==0.3.1
+
+COPY . /app/graph2smiles
+WORKDIR /app/graph2smiles
+
+EXPOSE 9520 9521 9522
