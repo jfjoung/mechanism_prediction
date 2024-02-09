@@ -12,7 +12,7 @@ from datetime import datetime
 from onmt.bin.translate import _get_parser, translate
 from rdkit import RDLogger
 from tqdm import tqdm
-from utils import canonicalize_smiles
+from utils import canonicalize_smiles, MECH
 
 global G_predictions
 
@@ -28,7 +28,7 @@ def csv2kv(_args):
         except KeyError:
             break
 
-        if not prediction or prediction == "9999":          # padding
+        if not prediction or prediction == "9999":  # padding
             break
 
         prediction = canonicalize_smiles(prediction)
@@ -45,7 +45,6 @@ def match_results(_args):
     accuracy = np.zeros(n_best, dtype=np.float32)
 
     reactants, reagent, gt = test_row["rxn_smiles"].strip().split(">")
-    # reactants, reagent, gt = test_row["unmapped_rxn"].strip().split(">")
     k = canonicalize_smiles(reactants)
 
     if k not in predictions:
@@ -72,8 +71,7 @@ class ATPredictor:
         self.model_path = args.model_path
         self.test_output_path = args.test_output_path
         self.aug_factor = args.aug_factor
-        self.test_unseen_name = args.test_unseen_name
-        self.output_file = os.path.join(self.test_output_path, "predictions_{}.csv".format(self.test_unseen_name))
+        self.output_file = os.path.join(self.test_output_path, "predictions.csv")
 
         random.seed(args.seed)
         np.random.seed(args.seed)
@@ -95,12 +93,12 @@ class ATPredictor:
         checkpoints = glob.glob(os.path.join(self.model_path, "model_step_*.pt"))
         last_checkpoint = sorted(checkpoints, reverse=True)[0]
         # self.model_args.models = [self.model_path]
-        # self.model_args.models = [last_checkpoint]
-        self.model_args.models = [os.path.join(self.model_path, "mech_1250000.pt")] # "full_1250000.pt")]
+        # last_checkpoint = os.path.join(self.model_path, "model_step_1250000.pt")
+        self.model_args.models = [last_checkpoint]
         self.model_args.src = os.path.join(self.processed_data_path, "src-test-cano.txt")
-        self.model_args.output = os.path.join(self.test_output_path, "predictions_on_test_{}.txt".format(self.test_unseen_name))
+        self.model_args.output = os.path.join(self.test_output_path, "predictions_on_test.txt")
 
-    def translate_own(self,opt):
+    def translate_own(self, opt):
         from onmt.utils.logging import init_logger
         from onmt.utils.misc import split_corpus
         from onmt.translate.translator import build_translator
@@ -127,15 +125,8 @@ class ATPredictor:
             )
             scores.append(score)
             predictions.append(prediction)
-            # print(score)
-            # for sc in score:
-            #     print(len(sc))
-            #     for s in sc:
-            #         print(s.cpu().data.numpy())
-            #     raise
 
-
-        return scores, predictions
+        yield scores, predictions
 
     def predict(self):
         """Actual file-based predicting, a wrapper to onmt.bin.translate()"""
@@ -146,10 +137,10 @@ class ATPredictor:
         #     translate(self.model_args)
 
         self.keep_cano()
-        # translate(self.model_args)
+        translate(self.model_args)
         # scores, predictions = self.translate_own(self.model_args)
-
-
+        # print(scores)
+        # print(predictions)
         logger = misc.setup_logger(args.log_file)
         self.compile_into_csv()
         self.score()
@@ -158,6 +149,13 @@ class ATPredictor:
         fn = os.path.join(self.processed_data_path, "src-test.txt")
         ofn = self.model_args.src
         logging.info(f"Truncating {fn} to {ofn}, keeping only first (canonical) SMILES")
+
+        # with open(fn, "r") as f, open(ofn, "w") as of:
+        #     for i, line in enumerate(f):
+        #         if i % self.aug_factor == 0 and not MECH:
+        #             of.write(line)
+        #         else:
+        #             of.write(line)
 
         with open(fn, "r") as f, open(ofn, "w") as of:
             for i, line in enumerate(f):

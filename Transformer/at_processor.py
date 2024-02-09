@@ -9,8 +9,7 @@ from multiprocessing import Pool
 from onmt.bin.preprocess import _get_parser, preprocess
 from rdkit import Chem, RDLogger
 from tqdm import tqdm
-from utils import smi_tokenizer
-
+from utils import smi_tokenizer, MECH
 
 def tokenize(_task):
     row, aug_factor = _task
@@ -18,8 +17,15 @@ def tokenize(_task):
     tgt_lines = []
     try:
         reactants, reagents, products = row["rxn_smiles"].split(">")
-        mols_r = Chem.MolFromSmiles(reactants)
-        mols_p = Chem.MolFromSmiles(products)
+        if not MECH:
+            mols_r = Chem.MolFromSmiles(reactants)
+            mols_p = Chem.MolFromSmiles(products)
+        else:
+            mols_r = Chem.MolFromSmiles(reactants, sanitize=False)
+            mols_r.UpdatePropertyCache(strict=False)
+            mols_p = Chem.MolFromSmiles(products, sanitize=False)
+            mols_p.UpdatePropertyCache(strict=False)
+
         if mols_r is None or mols_p is None:
             return [], []
 
@@ -34,15 +40,28 @@ def tokenize(_task):
 
         if aug_factor > 1:
             for _ in range(aug_factor - 1):
-                smi_r = Chem.MolToSmiles(mols_r, isomericSmiles=True, doRandom=True)
-                smi_p = Chem.MolToSmiles(mols_p, isomericSmiles=True, doRandom=True)
+                if not MECH:
+                    smi_r = Chem.MolToSmiles(mols_r, isomericSmiles=True, doRandom=True)
+                    smi_p = Chem.MolToSmiles(mols_p, isomericSmiles=True, doRandom=True)
 
-                smis_r = smi_r.split(".")
-                random.shuffle(smis_r)
-                smi_r = ".".join(smis_r)
+                    smis_r = smi_r.split(".")
+                    random.shuffle(smis_r)
+                    smi_r = ".".join(smis_r)
 
-                src_lines.append(f"{smi_tokenizer(smi_r.strip())}\n")
-                tgt_lines.append(f"{smi_tokenizer(smi_p.strip())}\n")
+                    src_lines.append(f"{smi_tokenizer(smi_r.strip())}\n")
+                    tgt_lines.append(f"{smi_tokenizer(smi_p.strip())}\n")
+                else:
+                    smis_r = cano_smi_r.split(".")
+                    random.shuffle(smis_r)
+                    smi_r = ".".join(smis_r)
+
+                    smi_p = cano_smi_p.split(".")
+                    random.shuffle(smi_p)
+                    smi_p = ".".join(smi_p)
+
+                    src_lines.append(f"{smi_tokenizer(smi_r.strip())}\n")
+                    tgt_lines.append(f"{smi_tokenizer(smi_p.strip())}\n")
+
 
     except Exception as e:
         logging.info(e)
@@ -114,30 +133,39 @@ class ATProcessor:
                         f"'rxn_smiles' is included!"
 
                     reactants, reagents, products = row["rxn_smiles"].split(">")
-                    Chem.MolFromSmiles(reactants)       # simply ensures that SMILES can be parsed
-                    Chem.MolFromSmiles(products)        # simply ensures that SMILES can be parsed
+                    # Chem.MolFromSmiles(reactants)       # simply ensures that SMILES can be parsed
+                    # Chem.MolFromSmiles(products)        # simply ensures that SMILES can be parsed
+                    if not MECH:
+                        mols_r = Chem.MolFromSmiles(reactants)
+                        mols_p = Chem.MolFromSmiles(products)
+                    else:
+                        mols_r = Chem.MolFromSmiles(reactants, sanitize=False)
+                        mols_r.UpdatePropertyCache(strict=False)
+                        mols_p = Chem.MolFromSmiles(products, sanitize=False)
+                        mols_p.UpdatePropertyCache(strict=False)
+
+
 
         logging.info("Data format check passed")
 
     def preprocess(self) -> None:
         """Actual file-based preprocessing"""
         self.split_src_tgt(aug_factor=self.aug_factor)
-        # preprocess(self.model_args)
+        preprocess(self.model_args)
 
     def split_src_tgt(self, aug_factor: int = 1):
         """Split reaction SMILES into source and target"""
         logging.info("Splitting reaction SMILES into source and target")
         p = Pool(self.num_cores)
 
-        # for phase, fn in [("train", self.train_file),
-        #                   ("val", self.val_file),
-        #                   ("test", self.test_file)]:
-        for phase, fn in [("test", self.test_file)]:
+        for phase, fn in [("train", self.train_file),
+                          ("val", self.val_file),
+                          ("test", self.test_file)]:
             ofn_src = os.path.join(self.processed_data_path, f"src-{phase}.txt")
             ofn_tgt = os.path.join(self.processed_data_path, f"tgt-{phase}.txt")
-            # if os.path.exists(ofn_src) and os.path.exists(ofn_tgt):
-            #     logging.info(f"{ofn_src} and {ofn_tgt} found! Skipping for phase {phase}")
-            #     continue
+            if os.path.exists(ofn_src) and os.path.exists(ofn_tgt):
+                logging.info(f"{ofn_src} and {ofn_tgt} found! Skipping for phase {phase}")
+                continue
 
             invalid_count = 0
             with open(fn, "r") as f, open(ofn_src, "w") as of_src, open(ofn_tgt, "w") as of_tgt:
