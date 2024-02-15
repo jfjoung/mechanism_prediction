@@ -89,4 +89,13 @@ The reaction mechanism from a set of reactants can be predicted using the `bin/p
 python bin/predict.py --smiles "CCCCCCN.O=C(O)c1cccc(CBr)c1"
 ```
 
-It will print the possible reaction pathways 
+It will print the possible reaction pathways in the format of,
+```
+{Accumulate_probability: {'reactions': [a list of chemicals for elementary steps], 'prob': [a list of a probabiltiy for elementary steps], 'predicted_edits': [a list of edits for elementary steps], 'score': [a list of score for elementary steps], 'rank': [a list of rank for each elementary step]}}
+
+
+{0.8647005051771167: {'reaction': ['CCCCCCN.O=C(O)c1cccc(CBr)c1', 'CCCCCC[NH2+]C([O-])(O)c1cccc(CBr)c1', 'CCCCCCNC([O-])(O)c1cccc(CBr)c1', 'CCCCCCNC(=O)c1cccc(CBr)c1.[OH-]', 'CCCCCCNC(=O)c1cccc(CBr)c1.[OH-]'], 'prob': [1, 0.864800298454965, 1.0, 1.0, 0.9998846], 'predicted_edits': [[], [(6, 8, 1.0, 'b'), (7, 8, 1.0, 'b'), (6, 5, 2, 'f'), (7, 8, 1, 'f')], [(6, 5, 0, 'h'), (6, 5, 1, 'f')], [(7, 9, 0.0, 'b'), (7, 8, 2.0, 'b'), (9, 7, 1, 'f'), (8, 7, 2, 'f')], []], 'score': [0, -18.715117, 25.234385, 216.97578, -25.030212], 'rank': [1, 1, 1, 1, 1]},
+0.134605929707336: {'reaction': ['CCCCCCN.O=C(O)c1cccc(CBr)c1', 'CCCCCC[NH2+]Cc1cccc(C(=O)O)c1.[Br-]', 'CCCCCCNCc1cccc(C(=O)O)c1.[Br-]', 'CCCCCCNCc1cccc(C(=O)O)c1.[Br-]'], 'prob': [1, 0.1350925015621326, 0.99999404, 0.9964042], 'predicted_edits': [[], [(15, 16, 0.0, 'b'), (6, 15, 1.0, 'b'), (16, 15, 1, 'f'), (6, 5, 2, 'f')], [(6, 5, 0, 'h'), (6, 5, 1, 'f')], []], 'score': [0, -20.571655, -12.999102, -25.030212], 'rank': [1, 2, 1, 1]},
+0.0004752531801971084: {'reaction': ['CCCCCCN.O=C(O)c1cccc(CBr)c1', 'CCCCCC[NH2+]Cc1cccc(C(=O)O)c1.[Br-]', 'CCCCCCNCc1cccc(C(=O)O)c1.[Br-]', 'CCCCCC[NH+]1Cc2cccc(c2)C1([O-])O.[Br-]', 'CCCCCCN1Cc2cccc(c2)C1([O-])O.[Br-]', 'CCCCCCN1Cc2cccc(c2)C1=O.[Br-].[OH-]', 'CCCCCCN1Cc2cccc(c2)C1=O.[Br-].[OH-]'], 'prob': [1, 0.1350925015621326, 0.99999404, 0.0035180103, 0.99999845, 1.0, 0.9999999], 'predicted_edits': [[], [(15, 16, 0.0, 'b'), (6, 15, 1.0, 'b'), (16, 15, 1, 'f'), (6, 5, 2, 'f')], [(6, 5, 0, 'h'), (6, 5, 1, 'f')], [(13, 14, 1.0, 'b'), (6, 13, 1.0, 'b'), (14, 13, 1, 'f'), (6, 5, 2, 'f')], [(6, 5, 0, 'h'), (6, 5, 1, 'f')], [(14, 16, 0.0, 'b'), (14, 15, 2.0, 'b'), (16, 14, 1, 'f'), (15, 14, 2, 'f')], []], 'score': [0, -20.571655, -12.999102, -30.67647, 66.12041, 164.423, -23.111406], 'rank': [1, 2, 1, 2, 1, 1, 1]}}
+```
+
