@@ -26,9 +26,15 @@ export TEST_FILE=$PWD/data/mech/raw/raw_test.csv
 
 ### Step 4/4: Benchmarking
 
-Run benchmarking on a machine with GPU using
+- Run benchmarking on a machine with GPU using
 ```
 bash scripts/benchmark_in_docker.sh
 ```
 This will run the preprocessing, training and predicting for Augmented Transformer with Top-n accuracies up to n=20 as the final outputs. Progress and result logs will be saved under ./logs.
+
+
+- Run beam search on held out test set reactants using
+```
+bash scripts/beam_search_in_docker.sh
+```
 
