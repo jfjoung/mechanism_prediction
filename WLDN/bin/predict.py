@@ -96,7 +96,7 @@ def beam_search(args, smiles, predictor, beam_width=3, max_steps=7, max_iter=100
 if __name__ == '__main__':
     '''
     eg command line run
-    python predict.py --model_name uspto_500k --smiles "CCCCCCN.O=C(O)c1cccc(CBr)c1"
+    python predict.py --model_name mech_pred --smiles "CCCCCCN.O=C(O)c1cccc(CBr)c1"
 
     '''
     args = parse_arguments()
