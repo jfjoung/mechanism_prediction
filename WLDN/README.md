@@ -16,14 +16,14 @@ At the core of both the core predictor and the candidate ranker is an implementa
 The forward predictor can be installed from source as follows:
 
 ```shell
-git clone https://gitlab.com/mlpds_mit/ASKCOS/wln-keras-fw
-cd wln-keras-fw
-conda env create --file environment_wlnfw.yml
+git clone https://github.com/jfjoung/mechanism_prediction.git
+cd mechanism_prediction/WLDN
+conda env create --file environment.yml
 conda activate wlnfw
 pip install .
 ```
 
-The environment_wlnfw.yml file contains all the essential python dependencies which are needed to train/test/run the forward predictor.
+The environment.yml file contains all the essential python dependencies which are needed to train/test/run the forward predictor.
 
 To use the forward predictor with GPUs, the following packages will need to be installed on top of the packages present in the environment_wlnfw.yml environment-file:
 
