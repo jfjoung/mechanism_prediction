@@ -1,17 +1,12 @@
 #!/bin/bash
+
+export CUDA_VISIBLE_DEVICES="0,1"
 export BATCH_SIZE=4096
 export ACCUMULATION_COUNT=4
 export NUM_NODES=1
 export NUM_GPU=2
 
-docker run --rm --shm-size=5gb --gpus '"device=0,1"' \
-  -v "$PWD/logs":/app/augmented_transformer/logs \
-  -v "$PWD/checkpoints":/app/augmented_transformer/checkpoints \
-  -v "$PWD/results":/app/augmented_transformer/results \
-  -v "$PROCESSED_DATA_PATH":/app/augmented_transformer/data/tmp_for_docker/processed \
-  -v "$MODEL_PATH":/app/augmented_transformer/checkpoints/tmp_for_docker \
-  -t "${ASKCOS_REGISTRY}"/forward_predictor/augmented_transformer:1.0-gpu \
-  python at_trainer.py \
+python at_trainer.py \
   -world_size $NUM_GPU \
   -gpu_ranks 0 1\
   --do_train \
@@ -19,12 +14,12 @@ docker run --rm --shm-size=5gb --gpus '"device=0,1"' \
   --model_name="augmented_transformer" \
   --data_name="$DATA_NAME" \
   --log_file="augmented_transformer_train_$DATA_NAME" \
-  --processed_data_path=/app/augmented_transformer/data/tmp_for_docker/processed \
-  --model_path=/app/augmented_transformer/checkpoints/tmp_for_docker \
+  --processed_data_path="$PROCESSED_DATA_PATH" \
+  --model_path="$MODEL_PATH" \
   -seed 42 \
   -save_checkpoint_steps 10000 \
   -keep_checkpoint 10 \
-  -train_steps 500000 \
+  -train_steps 3250000 \
   -param_init 0 \
   -param_init_glorot \
   -max_generator_batches 32 \
@@ -54,3 +49,4 @@ docker run --rm --shm-size=5gb --gpus '"device=0,1"' \
   -self_attn_type scaled-dot \
   --heads 8 \
   -transformer_ff 2048
+
