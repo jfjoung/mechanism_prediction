@@ -28,7 +28,7 @@ def csv2kv(_args):
         except KeyError:
             break
 
-        if not prediction or prediction == "9999":  # padding
+        if not prediction or prediction == "9999":          # padding
             break
 
         prediction = canonicalize_smiles(prediction)
@@ -122,11 +122,12 @@ class ATPredictor:
                 batch_type=opt.batch_type,
                 attn_debug=opt.attn_debug,
                 align_debug=opt.align_debug
-            )
+                )
             scores.append(score)
             predictions.append(prediction)
-
+            
         yield scores, predictions
+
 
     def predict(self):
         """Actual file-based predicting, a wrapper to onmt.bin.translate()"""
@@ -156,12 +157,12 @@ class ATPredictor:
         #             of.write(line)
         #         else:
         #             of.write(line)
-
+        
         with open(fn, "r") as f, open(ofn, "w") as of:
             for i, line in enumerate(f):
                 if i % self.aug_factor == 0:
                     of.write(line)
-
+    
     def compile_into_csv(self):
         logging.info("Compiling into predictions.csv")
 

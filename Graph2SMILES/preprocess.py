@@ -69,15 +69,14 @@ def split_src_tgt(args):
     logging.info("Splitting reaction SMILES into source and target")
     p = Pool(args.num_cores)
 
-    # for phase, fn in [("train", args.train_file),
-    #                   ("val", args.val_file),
-    #                   ("test", args.test_file)]:
-    for phase, fn in [("test", args.test_file)]:
+    for phase, fn in [("train", args.train_file),
+                      ("val", args.val_file),
+                      ("test", args.test_file)]:
         ofn_src = os.path.join(args.processed_data_path, f"src-{phase}.txt")
         ofn_tgt = os.path.join(args.processed_data_path, f"tgt-{phase}.txt")
-        # if os.path.exists(ofn_src) and os.path.exists(ofn_tgt):
-        #     logging.info(f"{ofn_src} and {ofn_tgt} found! Skipping for phase {phase}")
-        #     continue
+        if os.path.exists(ofn_src) and os.path.exists(ofn_tgt):
+            logging.info(f"{ofn_src} and {ofn_tgt} found! Skipping for phase {phase}")
+            continue
 
         invalid_count = 0
         with open(fn, "r") as f, open(ofn_src, "w") as of_src, open(ofn_tgt, "w") as of_tgt:
@@ -117,8 +116,7 @@ def get_seq_features_from_line(_args) -> Tuple[np.ndarray, int, np.ndarray, int]
 
 
 def binarize_g2s(args):
-    # for phase in ["train", "val", "test"]:
-    for phase in ["test"]:
+    for phase in ["train", "val", "test"]:
         src_file = os.path.join(args.processed_data_path, f"src-{phase}.txt")
         tgt_file = os.path.join(args.processed_data_path, f"tgt-{phase}.txt")
         output_file = os.path.join(args.processed_data_path, f"{phase}.npz")
@@ -142,15 +140,6 @@ def binarize_g2s(args):
         p.close()
         p.join()
 
-        # for i, (src_line, tgt_line) in enumerate(zip(src_lines, tgt_lines)):
-        #     try:
-        #         get_seq_features_from_line(i, src_line, tgt_line, args.max_src_len, args.max_tgt_len)
-        #     except:
-        #         print(i)
-        #         print(src_line)
-        #         print(tgt_line)
-        #         print("")
-
         seq_features_and_lengths = list(seq_features_and_lengths)
 
         logging.info(f"Done seq featurization, time: {time.time() - start}. Collating")
@@ -166,7 +155,6 @@ def binarize_g2s(args):
         start = time.time()
 
         p = Pool(args.num_cores)
-        # p = Pool(1)
         graph_features_and_lengths = p.imap(
             get_graph_features_from_smi,
             enumerate(src_lines)
@@ -217,7 +205,7 @@ def preprocess_main(args):
     os.makedirs(args.processed_data_path, exist_ok=True)
 
     split_src_tgt(args)
-    # make_vocab(args)
+    make_vocab(args)
 
     global G_vocab
     G_vocab = load_vocab(args)
@@ -240,6 +228,5 @@ if __name__ == "__main__":
     torch.set_printoptions(profile="full")
 
     start = time.time()
-    # print(args.prep)
     preprocess_main(args)
     logging.info(f"Preprocessing done, total time: {time.time() - start: .2f} s")

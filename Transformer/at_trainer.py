@@ -35,17 +35,19 @@ class ATTrainer:
     def overwrite_model_args(self):
         """Overwrite model args"""
         # Paths
+        self.model_args.train_from = os.path.join(self.model_path, "model_step_1420000.pt")
         self.model_args.log_file = self.log_file
         self.model_args.data = os.path.join(self.processed_data_path, "bin")
         self.model_args.save_model = os.path.join(self.model_path, "model")
 
         # ---------------------
-        import glob
-        checkpoints = glob.glob(os.path.join(self.model_path, "model_step_*.pt"))
-        if checkpoints:
-            last_checkpoint = sorted(checkpoints, reverse=True)[0]
-            # self.model_args.train_from = os.path.join(self.model_path, last_checkpoint)
-            self.model_args.train_from = os.path.join(self.model_path, "model_step_590000.pt")
+        # import glob
+        # checkpoints = glob.glob(os.path.join(self.model_path, "model_step_*.pt"))
+        # if checkpoints:
+        #     last_checkpoint = sorted(checkpoints, reverse=True)[0]
+        #     # self.model_args.train_from = os.path.join(self.model_path, last_checkpoint)
+        #     self.model_args.train_from = os.path.join(self.model_path, "model_step_1070000.pt")
+
 
     def train(self):
         """A wrapper to onmt.bin.train()"""

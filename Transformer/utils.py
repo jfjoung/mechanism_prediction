@@ -34,7 +34,7 @@ def canonicalize_smiles(smiles: str, remove_atom_number: bool = True):
         return cano_smiles
     else:
         smiles = "".join(smiles.split())
-        cano_smiles = ""
+        cano_smiles = "" 
 
         mol = Chem.MolFromSmiles(smiles, sanitize=False)
         if mol is None : return cano_smiles
