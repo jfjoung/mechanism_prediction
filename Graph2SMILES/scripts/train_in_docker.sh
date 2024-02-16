@@ -1,16 +1,20 @@
 #!/bin/bash
-
+export CUDA_VISIBLE_DEVICES=0
 export LOAD_FROM=""
 export MODEL=graph2smiles
 export MAX_REL_POS=4
 export ACCUM_COUNT=4
 export ENC_PE=none
 export ENC_H=256
-export BATCH_SIZE=4096
 export ENC_EMB_SCALE=sqrt
-export MAX_STEP=500000
-export ENC_LAYER=4
+export MAX_STEP=8000000
+# export BATCH_SIZE=8192
+# export BATCH_TYPE=tokens_sum
+# export ACCUMULATION_COUNT=4
+export BATCH_SIZE=4096
 export BATCH_TYPE=tokens
+export ACCUMULATION_COUNT=8
+export ENC_LAYER=4
 export REL_BUCKETS=15
 export REL_POS=emb_only
 export ATTN_LAYER=6
@@ -20,19 +24,12 @@ export DGAT_H=8
 export LR=2
 export DROPOUT=0.1
 
-docker run --rm --shm-size=5gb --gpus '"device=0"' \
-  -v "$PWD/logs":/app/graph2smiles/logs \
-  -v "$PWD/checkpoints":/app/graph2smiles/checkpoints \
-  -v "$PWD/results":/app/graph2smiles/results \
-  -v "$PROCESSED_DATA_PATH":/app/graph2smiles/data/tmp_for_docker/processed \
-  -v "$MODEL_PATH":/app/graph2smiles/checkpoints/tmp_for_docker \
-  -t "${ASKCOS_REGISTRY}"/forward_predictor/graph2smiles:1.0-gpu \
-  python train.py \
+python train.py \
   --model="$MODEL" \
   --data_name="$DATA_NAME" \
   --log_file="graph2smiles_train_$DATA_NAME" \
-  --processed_data_path=/app/graph2smiles/data/tmp_for_docker/processed \
-  --model_path=/app/graph2smiles/checkpoints/tmp_for_docker \
+  --processed_data_path="$PROCESSED_DATA_PATH" \
+  --model_path="$MODEL_PATH" \
   --embed_size=256 \
   --mpn_type="$MPN_TYPE" \
   --dgat_attn_heads="$DGAT_H" \
@@ -61,10 +58,10 @@ docker run --rm --shm-size=5gb --gpus '"device=0"' \
   --weight_decay=0.0 \
   --clip_norm=20.0 \
   --batch_type="$BATCH_TYPE" \
-  --train_batch_size="$BATCH_SIZE" \
-  --val_batch_size="$BATCH_SIZE" \
-  --predict_batch_size="$BATCH_SIZE" \
-  --accumulation_count=4 \
+    --train_batch_size=$((BATCH_SIZE / NUM_NODES / NUM_GPU)) \
+    --val_batch_size=$((BATCH_SIZE / NUM_NODES / NUM_GPU)) \
+    --predict_batch_size=$((BATCH_SIZE / NUM_NODES / NUM_GPU)) \
+    --accumulation_count="$ACCUMULATION_COUNT" \
   --num_cores="$NUM_CORES" \
   --beam_size=5 \
   --predict_min_len=1 \

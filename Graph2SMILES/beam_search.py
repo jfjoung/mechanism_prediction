@@ -385,46 +385,22 @@ def score(args):
         print(f"Top {n + 1} accuracy: {mean_accuracies[n]}")
 
 
-# if __name__ == "__main__":
-#     # initialization ---------------------------------- args, logs and devices
-#
-#
-#     predict_parser = get_beam_search_parser()
-#     args = predict_parser.parse_args()
-#
-#
-#     handler = G2SHandler()
-#     handler.initialize()
-#
-#     for phase, fn in [("test", args.test_file)]:
-#
-#         with open(fn, "r") as f:
-#             csv_reader = csv.DictReader(f)
-#             for line in csv_reader:
-#                 rsmi, psmi = line['rxn_smiles'].split('>>')
-#
-#                 output = handler.handle([rsmi])
-#
-#                 products = output[0][0]
-#                 print(products)
-#                 print("")
-
-
-
 if __name__ == "__main__":
     # initialization ---------------------------------- args, logs and devices
     predict_parser = get_beam_search_parser()
     args = predict_parser.parse_args()
     handler = G2SHandler()
     handler.initialize()
-    k=3
-    depth=8
+    k = 3
+    depth = 8
 
-    saving_file=args.test_file[:-4]+'.pickle'
+    # args.test_file.split(".")[0]
+    saving_file = args.test_file.split(".")[0].split('/')[-1]+'.pickle'
+    saving_path = args.test_output_path
 
     results = []
     for phase, fn in [("test", args.test_file)]:
-        with open(fn, "r") as f, open(saving_file, "wb") as f_out:
+        with open(fn, "r") as f, open(saving_path+'/'+saving_file, "wb") as f_out:
             csv_reader = csv.DictReader(f)
             for line in tqdm(csv_reader):
                 rsmi, psmi = line['rxn_smiles'].split('>>')
@@ -461,36 +437,3 @@ if __name__ == "__main__":
 
             pickle.dump(results, f_out)
     score(args)
-
-#
-
-# if __name__ == "__main__":
-#     # initialization ---------------------------------- args, logs and devices
-#     predict_parser = get_beam_search_parser()
-#     args = predict_parser.parse_args()
-#
-#
-#     handler = G2SHandler()
-#     handler.initialize()
-#     for phase, fn in [("test", args.test_file)]:
-#         with open(fn, "r") as f:
-#             csv_reader = csv.DictReader(f)
-#             for line in csv_reader:
-#                 rsmi, psmi = line['rxn_smiles'].split('>>')
-#
-#                 rmol = Chem.MolFromSmiles(rsmi)
-#                 formula = CalcMolFormula(rmol)
-#                 print(formula)
-#
-#                 output = handler.handle([rsmi])
-#                 products = output[0][0]
-#                 print(products)
-#
-#                 for product in products['products']:
-#                     print(product)
-#                     pmol = Chem.MolFromSmiles(product, sanitize=False)
-#                     pmol.UpdatePropertyCache(strict=False)
-#                     p_formula = CalcMolFormula(pmol)
-#                     print(p_formula)
-#                 # print(products)
-#                 print("")
