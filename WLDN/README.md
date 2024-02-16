@@ -91,12 +91,18 @@ python bin/predict.py --smiles "CCCCCCN.O=C(O)c1cccc(CBr)c1"
 
 It will print the possible reaction pathways in the format of,
 
-{Accumulate_probability: 
- {'reactions': [a list of chemicals for elementary steps],
- 'prob': [a list of a probabiltiy for elementary steps],
- 'predicted_edits': [a list of edits for elementary steps],
- 'score': [a list of score for elementary steps],
- 'rank': [a list of rank for each elementary step]}}
+```
+{
+  Accumulate_probability:
+  {
+    'reactions': [a list of chemicals for elementary steps],
+    'prob': [a list of a probabiltiy for elementary steps],
+    'predicted_edits': [a list of edits for elementary steps],
+    'score': [a list of score for elementary steps],
+    'rank': [a list of rank for each elementary step]
+  }
+}
+```
 
 The prediction results of "CCCCCCN.O=C(O)c1cccc(CBr)c1" will be:
 
