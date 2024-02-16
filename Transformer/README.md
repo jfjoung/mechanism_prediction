@@ -15,7 +15,7 @@ Prepare the raw .csv files for train, validation and test (atom mapping not requ
 
 ### Step 3/4: Path Configuration
 
-Configure the environment variables in ./scripts/benchmark_in_docker.sh, especially the paths, to point to the *absolute* paths of raw files and desired output paths.
+Configure the environment variables in ./scripts/benchmark.sh, especially the paths, to point to the *absolute* paths of raw files and desired output paths.
 ```
 export DATA_NAME="mech"
 export TRAIN_FILE=$PWD/data/mech/raw/raw_train.csv
@@ -28,18 +28,23 @@ export TEST_FILE=$PWD/data/mech/raw/raw_test.csv
 
 - Run benchmarking on a machine with GPU using
 ```
-bash scripts/benchmark_in_docker.sh
+bash scripts/benchmark.sh
 ```
-This will run the preprocessing, training and predicting for Augmented Transformer with Top-n accuracies up to n=20 as the final outputs. Progress and result logs will be saved under ./logs.
+This will run the preprocessing, training and predicting (uncomment the scripts as necessary) for Augmented Transformer with Top-n accuracies up to n=20 as the final outputs. Progress and result logs will be saved under ./logs
 
 ### Try out pretrained models
 
-- Open new folder `Transformer/checkpoints/mech` and load the downloaded models into the directory
 - Open new folder `Transformer/checkpoints/mech/unseen_reactions` and load the unseen test set csv into the directory
+- Open new folder `Transformer/checkpoints/mech` and load the downloaded models into the directory
+- Configure model unseen test set csv filename under `benchmark.sh`
+```
+...
+export TEST_UNSEEN_PATH="$PWD/data/mech/unseen_reactions/test.csv"
+...
+```
 - Configure model checkpoint file name under `beam_search.sh`
 ```
 export CHECKPOINT="model_step_1250000.pt"
-
 ```
 
 - Run beam search on held out test set reactants using by uncommenting `bash scripts/beam_search.sh` and run

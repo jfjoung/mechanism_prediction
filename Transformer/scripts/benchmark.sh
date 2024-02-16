@@ -5,8 +5,8 @@ export ASKCOS_REGISTRY=registry.gitlab.com/mlpds_mit/askcosv2
 export DATA_NAME="mech"  #I need to change this to 'mech' or 'full'
 export TRAIN_FILE=$PWD/data/mech/raw/raw_train.csv
 export VAL_FILE=$PWD/data/mech/raw/raw_val.csv
-# export TEST_FILE=$PWD/data/mech/raw/raw_test.csv
-export TEST_UNSEEN_PATH="$PWD/data/mech/unseen_reactions/intermediate_test.csv"
+export TEST_FILE=$PWD/data/mech/raw/raw_test.csv
+export TEST_UNSEEN_PATH="$PWD/data/mech/unseen_reactions/test.csv"
 export NUM_CORES=32
 
 export PROCESSED_DATA_PATH=$PWD/data/$DATA_NAME/processed
