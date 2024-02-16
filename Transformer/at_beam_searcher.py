@@ -13,6 +13,7 @@ from onmt.bin.translate import _get_parser, translate
 from rdkit import RDLogger
 from tqdm import tqdm
 from utils import canonicalize_smiles
+from at_processor import tokenize
 import tree_builder_ver2
 import pickle
 
@@ -61,11 +62,10 @@ def match_results(_args):
     accuracy = np.zeros(n_best, dtype=np.float32)
 
     reactants, reagent, gt = test_row["rxn_smiles"].strip().split(">")
-    # reactants, reagent, gt = test_row["unmapped_rxn"].strip().split(">")
     k = canonicalize_smiles(reactants)
 
     if k not in predictions:
-        logging.info(f"Product {reactants} not found in predictions (after canonicalization), skipping")
+        logging.info(f"Reactant {reactants} not found in predictions (after canonicalization), skipping")
         return accuracy
 
     gt = canonicalize_smiles(gt)
@@ -73,7 +73,6 @@ def match_results(_args):
 
     for j, prediction in enumerate(predictions[k]):
         prod_set = set(prediction.split('.'))
-        # print(prod_set)
         if gt in prod_set:
             accuracy[j:] = 1.0
             break
@@ -89,10 +88,13 @@ class ATPredictor:
         self.data_name = args.data_name
         self.log_file = args.log_file
         self.processed_data_path = args.processed_data_path
+        os.makedirs(self.processed_data_path, exist_ok=True)
         self.model_path = args.model_path
         self.test_output_path = args.test_output_path
         self.aug_factor = args.aug_factor
-        self.test_unseen_name = args.test_unseen_name
+        self.test_unseen_path = args.test_unseen_path
+        os.makedirs(self.test_output_path, exist_ok=True)
+        self.test_unseen_name = self.test_unseen_path.split('/')[-1].split(".")[0]
         self.output_file = os.path.join(self.test_output_path, "predictions_{}.pickle".format(self.test_unseen_name))
         self.depth = 7 #Depth for beam search
 
@@ -113,13 +115,9 @@ class ATPredictor:
         """Overwrite model args"""
         # Paths
         # Overwriting model path with the last checkpoint
-        checkpoints = glob.glob(os.path.join(self.model_path, "model_step_*.pt"))
-        last_checkpoint = sorted(checkpoints, reverse=True)[0]
-        # self.model_args.models = [self.model_path]
-        # self.model_args.models = [last_checkpoint]
-        self.model_args.models = [os.path.join(self.model_path, "mech_1250000.pt")]
-        # self.model_args.src = os.path.join(self.processed_data_path, "src-test-cano.txt")
-        # self.model_args.output = os.path.join(self.test_output_path, "predictions_on_test_{}.txt".format(self.test_unseen_name))
+        self.model_args.models = [os.path.join(self.model_path, args.checkpoint)]
+        self.model_args.src = os.path.join(self.processed_data_path, "src-unseen-test.txt")
+        self.model_args.output = os.path.join(self.test_output_path, "predictions_on_test_{}.txt".format(self.test_unseen_name))
 
     def translate_beam_search(self,opt):
         from onmt.utils.misc import split_corpus
@@ -181,63 +179,22 @@ class ATPredictor:
         return True
 
 
+    def preprocess(self):
+        ofn = self.model_args.src
+
+        with open(self.test_unseen_path, 'r') as file, open(ofn, 'w') as output:
+            csv_reader = csv.DictReader(file)
+
+            for _, row in enumerate(csv_reader):
+                src, tgt = tokenize((row, 1))
+                output.write(f"{src[0]}")
 
     def predict(self):
         """Actual file-based predicting, a wrapper to onmt.bin.translate()"""
 
-        self.keep_cano()
+        self.preprocess()
         self.translate_beam_search(self.model_args)
-        logger = misc.setup_logger(args.log_file)
         self.score()
-
-
-
-    def keep_cano(self):
-        fn = os.path.join(self.processed_data_path, "src-test.txt")
-        # fn = self.fn
-        ofn = self.model_args.src
-        logging.info(f"Truncating {fn} to {ofn}, keeping only first (canonical) SMILES")
-
-        with open(fn, "r") as f, open(ofn, "w") as of:
-            for i, line in enumerate(f):
-                if i % self.aug_factor == 0:
-                    of.write(line)
-
-    def compile_into_csv(self):
-        logging.info("Compiling into predictions.csv")
-        src_file = os.path.join(self.processed_data_path, "src-test-cano.txt")
-
-        with open(src_file, "r") as f:
-            total_src = sum(1 for _ in f)
-
-        with open(self.model_args.output, "r") as f:
-            total_gen = sum(1 for _ in f)
-
-        n_best = self.model_args.n_best
-        assert total_src == total_gen / n_best, \
-            f"File length mismatch! Source total: {total_src}, " \
-            f"prediction total: {total_gen}, n_best: {n_best}"
-
-        proposed_col_names = [f'cand_precursor_{i}' for i in range(1, self.model_args.n_best + 1)]
-        headers = ['prod_smi']
-        headers.extend(proposed_col_names)
-
-        with open(src_file, "r") as src_f, \
-                open(self.model_args.output, "r") as pred_f, \
-                open(self.output_file, "w") as of:
-            header_line = ",".join(headers)
-            of.write(f"{header_line}\n")
-
-            for src_line in src_f:
-                of.write("".join(src_line.strip().split()))
-
-                for j in range(n_best):
-                    cand = pred_f.readline()
-                    of.write(",")
-                    of.write("".join(cand.strip().split()))
-                of.write("\n")
-
-
 
     def score(self):
         global G_predictions
@@ -262,8 +219,8 @@ class ATPredictor:
         p = multiprocessing.Pool(args.num_cores)  # re-initialize to see the global variable
 
         # Results matching
-        logging.info(f"Matching against ground truth from {args.test_file}")
-        with open(args.test_file, "r") as test_csv:
+        logging.info(f"Matching against ground truth from {self.test_unseen_path}")
+        with open(self.test_unseen_path, "r") as test_csv:
             test_reader = csv.DictReader(test_csv)
             accuracies = p.imap(match_results,
                                 ((test_row, n_best) for test_row in test_reader))

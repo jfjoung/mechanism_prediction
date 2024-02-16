@@ -98,37 +98,6 @@ class ATPredictor:
         self.model_args.src = os.path.join(self.processed_data_path, "src-test-cano.txt")
         self.model_args.output = os.path.join(self.test_output_path, "predictions_on_test.txt")
 
-    def translate_own(self, opt):
-        from onmt.utils.logging import init_logger
-        from onmt.utils.misc import split_corpus
-        from onmt.translate.translator import build_translator
-
-        import onmt.opts as opts
-        from onmt.utils.parse import ArgumentParser
-
-        translator = build_translator(opt, logger=logger, report_score=True)
-        src_shards = split_corpus(opt.src, opt.shard_size)
-        tgt_shards = split_corpus(opt.tgt, opt.shard_size)
-        shard_pairs = zip(src_shards, tgt_shards)
-
-        scores, predictions = [], []
-        for i, (src_shard, tgt_shard) in enumerate(shard_pairs):
-            logger.info("Translating shard %d." % i)
-            score, prediction = translator.translate(
-                src=src_shard,
-                tgt=tgt_shard,
-                src_dir=opt.src_dir,
-                batch_size=opt.batch_size,
-                batch_type=opt.batch_type,
-                attn_debug=opt.attn_debug,
-                align_debug=opt.align_debug
-                )
-            scores.append(score)
-            predictions.append(prediction)
-            
-        yield scores, predictions
-
-
     def predict(self):
         """Actual file-based predicting, a wrapper to onmt.bin.translate()"""
         # if os.path.exists(self.model_args.output):
@@ -139,9 +108,6 @@ class ATPredictor:
 
         self.keep_cano()
         translate(self.model_args)
-        # scores, predictions = self.translate_own(self.model_args)
-        # print(scores)
-        # print(predictions)
         logger = misc.setup_logger(args.log_file)
         self.compile_into_csv()
         self.score()

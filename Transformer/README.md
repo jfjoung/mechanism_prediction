@@ -32,9 +32,18 @@ bash scripts/benchmark_in_docker.sh
 ```
 This will run the preprocessing, training and predicting for Augmented Transformer with Top-n accuracies up to n=20 as the final outputs. Progress and result logs will be saved under ./logs.
 
+### Try out pretrained models
 
-- Run beam search on held out test set reactants using
+- Open new folder `Transformer/checkpoints/mech` and load the downloaded models into the directory
+- Open new folder `Transformer/checkpoints/mech/unseen_reactions` and load the unseen test set csv into the directory
+- Configure model checkpoint file name under `beam_search.sh`
 ```
-bash scripts/beam_search_in_docker.sh
+export CHECKPOINT="model_step_1250000.pt"
+
+```
+
+- Run beam search on held out test set reactants using by uncommenting `bash scripts/beam_search.sh` and run
+```
+bash scripts/benchmark.sh
 ```
 

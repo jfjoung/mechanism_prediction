@@ -2,6 +2,11 @@ __pycache__
 *__pycache__/*
 .ipynb_checkpoints
 *.ipynb_checkpoints/*
+*/.ipynb_checkpoints/*
+*.log-*
 
-Transformer/checkpoints/*
-Graph2SMILES/checkpoints/*
+*/checkpoints/*
+*/checkpoints_tmp/*
+*/data/*
+*/logs/*
+*/results/*
