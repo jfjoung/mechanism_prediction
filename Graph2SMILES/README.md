@@ -33,6 +33,7 @@ bash scripts/benchmark.sh
 This will run the preprocessing, training and predicting (uncomment the scripts as necessary) for Graph2SMILES with Top-n accuracies up to n=20 as the final outputs. Progress and result logs will be saved under ./logs
 
 ### Try out pretrained models
+Download the model and vocab from the link [https://www.dropbox.com/scl/fo/9qagy7mg00jpo1uqr7pr3/h?rlkey=neyjoefseoltukjqgc4cdedjy&dl=0]
 
 - Open new folder `Graph2SMILES/checkpoints/mech/unseen_reactions` and load the unseen test set csv into the directory
 - Open new folder `Graph2SMILES/checkpoints/mech` and load the downloaded models into the directory
