@@ -33,7 +33,7 @@ bash scripts/benchmark.sh
 This will run the preprocessing, training and predicting (uncomment the scripts as necessary) for Augmented Transformer with Top-n accuracies up to n=20 as the final outputs. Progress and result logs will be saved under ./logs
 
 ### Try out pretrained models
-
+Download the model from the link [https://www.dropbox.com/scl/fo/o6siqbp1s2offg641al94/h?rlkey=46p2rvhldmobq2z25oi5di4ho&dl=0]
 - Open new folder `Transformer/checkpoints/mech/unseen_reactions` and load the unseen test set csv into the directory
 - Open new folder `Transformer/checkpoints/mech` and load the downloaded models into the directory
 - Configure model unseen test set csv filename under `benchmark.sh`
