@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export CHECKPOINT="model.850000_84.pt"
 export MODEL=graph2smiles
 export BATCH_TYPE=tokens
 export BATCH_SIZE=4096
@@ -14,7 +15,7 @@ python beam_search.py \
    --processed_data_path="$PROCESSED_DATA_PATH" \
    --model_path="$MODEL_PATH" \
    --test_output_path="$TEST_OUTPUT_PATH" \
-   --test_file="$TEST_FILE" \
+   --test_file="$TEST_UNSEEN_FILE" \
    --batch_type="$BATCH_TYPE" \
    --predict_batch_size="$BATCH_SIZE" \
    --accumulation_count=4 \

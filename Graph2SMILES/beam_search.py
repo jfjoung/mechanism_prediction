@@ -14,6 +14,7 @@ from tqdm import tqdm
 import tree_builder_ver2
 import pickle
 from utils.data_utils import canonicalize_smiles
+import os
 
 def get_beam_search_parser():
     parser = argparse.ArgumentParser("beam search")
@@ -41,7 +42,7 @@ class G2SHandler:
         self.p = Pool(args.num_cores)
 
     def overwrite_default_args(self):
-        self.args.load_from = "model.850000_84.pt"
+        # self.args.load_from = "model.850000_84.pt"
         self.args.vocab_file = "vocab.txt"
         # self.args.mask_rel_chirality = 1
         self.args.mask_rel_chirality = 0
@@ -62,14 +63,7 @@ class G2SHandler:
         # print(self.args.model_path)
 
         model_dir = self.args.model_path
-        # print(glob.glob(f"{model_dir}/*"))
-        # self.device = torch.device("cuda:" + str(properties.get("gpu_id")) if torch.cuda.is_available() else "cpu")
-        #
-        # with zipfile.ZipFile(model_dir + '/models.zip', 'r') as zip_ref:
-        #     zip_ref.extractall(model_dir)
-        # with zipfile.ZipFile(model_dir + '/utils.zip', 'r') as zip_ref:
-        #     zip_ref.extractall(model_dir)
-
+        
         from train import get_model
         from models.graph2smiles import Graph2SMILES
         from predict import get_predict_parser
@@ -81,7 +75,8 @@ class G2SHandler:
         self.args, _ = predict_parser.parse_known_args()
         self.overwrite_default_args()
 
-        checkpoint = model_dir + "/model.850000_84.pt"
+        # checkpoint = model_dir + "/model.850000_84.pt"
+        checkpoint = f"{model_dir}/{self.args.load_from}"
         state = torch.load(checkpoint, map_location=self.device)
         pretrain_args = state["args"]
         pretrain_state_dict = state["state_dict"]
@@ -348,16 +343,15 @@ def score(args):
     global G_predictions
     n_best = 3
 
-    # logging.info(f"Scoring predictions with model: {self.model_name}")
-    #
-    # # Load predictions and transform into a huge table {cano_prod: [cano_cand, ...]}
-    # logging.info(f"Loading predictions from {self.output_file}")
     predictions = {}
     p = Pool(args.num_cores)
 
-    saving_file = args.test_file[:-4] + '.pickle'
+    saving_file = args.test_file.split(".")[0].split('/')[-1]+'.pickle'
+    saving_path = args.test_output_path
+    os.makedirs(saving_path, exist_ok=True)
+    test_output_path = f"{saving_path}/{saving_file}"
 
-    with open(saving_file, 'rb') as file:
+    with open(test_output_path, 'rb') as file:
         prediction_reader = pickle.load(file)
         for result in tqdm(p.imap(pickle2kv,
                                   (prediction_row for prediction_row in prediction_reader))):
@@ -394,13 +388,14 @@ if __name__ == "__main__":
     k = 3
     depth = 8
 
-    # args.test_file.split(".")[0]
     saving_file = args.test_file.split(".")[0].split('/')[-1]+'.pickle'
     saving_path = args.test_output_path
+    os.makedirs(saving_path, exist_ok=True)
+    test_output_path = f"{saving_path}/{saving_file}"
 
     results = []
     for phase, fn in [("test", args.test_file)]:
-        with open(fn, "r") as f, open(saving_path+'/'+saving_file, "wb") as f_out:
+        with open(fn, "r") as f, open(test_output_path, "wb") as f_out:
             csv_reader = csv.DictReader(f)
             for line in tqdm(csv_reader):
                 rsmi, psmi = line['rxn_smiles'].split('>>')
