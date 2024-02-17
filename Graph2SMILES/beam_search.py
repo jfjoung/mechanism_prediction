@@ -97,7 +97,7 @@ class G2SHandler:
 
         model_class = Graph2SMILES
 
-        self.args.processed_data_path = model_dir
+        # self.args.processed_data_path = model_dir
         self.vocab = load_vocab(self.args)
         self.vocab_tokens = [k for k, v in sorted(self.vocab.items(), key=lambda tup: tup[1])]
 

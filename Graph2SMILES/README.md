@@ -36,12 +36,15 @@ This will run the preprocessing, training and predicting (uncomment the scripts 
 
 - Open new folder `Graph2SMILES/checkpoints/mech/unseen_reactions` and load the unseen test set csv into the directory
 - Open new folder `Graph2SMILES/checkpoints/mech` and load the downloaded models into the directory
+- Open new folder `Graph2SMILES/data/mech/processed` and load the vocab.txt into the directory
+
 - Configure model unseen test set csv filename under `benchmark.sh`
 ```
 ...
 export TEST_UNSEEN_PATH="$PWD/data/mech/unseen_reactions/test.csv"
 ...
 ```
+
 - Configure model checkpoint file name under `beam_search.sh`
 ```
 export CHECKPOINT="model.850000_84.pt"
