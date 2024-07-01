@@ -30,7 +30,17 @@ export TEST_FILE=$PWD/data/mech/raw/raw_test.csv
 ```
 bash scripts/benchmark.sh
 ```
-This will run the preprocessing, training and predicting (uncomment the scripts as necessary) for Augmented Transformer with Top-n accuracies up to n=20 as the final outputs. Progress and result logs will be saved under ./logs
+This will run the preprocessing, training and predicting (uncomment the scripts as necessary) for Augmented Transformer with Top-n accuracies up to n=20 as the final outputs. Progress and result logs will be saved under `./logs`.
+Specifically, uncomment the lines for preprocessing, training, and predicting, and comment out the line for beam search.
+
+For preprocessing, training, and evaluating:
+```
+bash scripts/preprocess.sh
+bash scripts/train.sh
+bash scripts/predict.sh
+# bash scripts/beam_search.sh
+```
+
 
 ### Try out pretrained models
 Download the model from the link [https://www.dropbox.com/scl/fo/o6siqbp1s2offg641al94/h?rlkey=46p2rvhldmobq2z25oi5di4ho&dl=0]
@@ -51,4 +61,10 @@ export CHECKPOINT="model_step_1250000.pt"
 ```
 bash scripts/benchmark.sh
 ```
-
+where inside `scripts/benchmark.sh`
+```
+bash scripts/preprocess.sh
+# bash scripts/train.sh
+# bash scripts/predict.sh
+bash scripts/beam_search.sh
+```
