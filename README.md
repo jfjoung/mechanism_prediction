@@ -11,4 +11,7 @@ There are three machine learning models designed for the task of predicting orga
 Each model folder contains a dedicated README.md file that provides detailed instructions on how to set up and use the model. Please navigate to the model folder of your choice and follow the instructions provided in the README.md.
 
 ## Data preparation
-You can make your own mechanistic dataset using the script in `Mechanistic_dataset_preparation/Mechanistic_dataset_generation.ipynb`.
+The mechanistic dataset generated from the USPTO-Full dataset is available for download. This dataset includes mechanistic pathways for a wide range of chemical reactions.
+Alternatively, you can download the dataset from Figshare: https://doi.org/10.6084/m9.figshare.26046106.v1. 
+
+
