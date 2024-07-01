@@ -12,6 +12,6 @@ Each model folder contains a dedicated README.md file that provides detailed ins
 
 ## Data preparation
 The mechanistic dataset generated from the USPTO-Full dataset is available for download. This dataset includes mechanistic pathways for a wide range of chemical reactions.
-Alternatively, you can download the dataset from Figshare: https://doi.org/10.6084/m9.figshare.26046106.v1. 
+You can download the dataset from Figshare: https://doi.org/10.6084/m9.figshare.26046106.v1. 
 
-
+Alternatively, you can create your own mechanistic dataset using the script in `Mechanistic_dataset_preparation/Mechanistic_dataset_generation.ipynb`.
