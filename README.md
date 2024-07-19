@@ -1,6 +1,6 @@
 # Mechanistic Model for Organic Reactions
 Machine learning models for mechanism prediction of organic reaction with WLDN, Transformer, and Graph2SMILES, each residing in its respective folder.
-This project is based on the manuscript []. (Manuscript under review)
+This project is based on the paper: https://doi.org/10.1002/anie.202411296.
 
 ## Choose the model
 There are three machine learning models designed for the task of predicting organic reaction mechanisms: 
